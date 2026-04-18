@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Reflection Tree</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0e11;
+    --card: #1a1820;
+    --border: #2e2b38;
+    --accent: #c9a96e;
+    --accent2: #7c6af7;
+    --text: #e8e4f0;
+    --muted: #7a7490;
+    --yes: #5cb88a;
+    --no: #e06b7d;
+    --neutral: #7c6af7;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px 80px;
+    background-image: radial-gradient(ellipse at 20% 20%, #1e1a2e 0%, transparent 60%),
+                      radial-gradient(ellipse at 80% 80%, #1a1620 0%, transparent 60%);
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 48px;
+    animation: fadeDown 0.8s ease both;
+  }
+
+  header .tag {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  header h1 {
+    font-family: 'Lora', serif;
+    font-size: clamp(26px, 5vw, 42px);
+    font-weight: 600;
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+
+  header p {
+    color: var(--muted);
+    font-size: 15px;
+    font-weight: 300;
+  }
+
+  .progress-bar {
+    width: 100%;
+    max-width: 560px;
+    height: 3px;
+    background: var(--border);
+    border-radius: 999px;
+    margin-bottom: 36px;
+    overflow: hidden;
+    animation: fadeDown 0.8s 0.2s ease both;
+    opacity: 0;
+    animation-fill-mode: forwards;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    border-radius: 999px;
+    transition: width 0.5s ease;
+    width: 0%;
+  }
+
+  .step-label {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 20px;
+    text-align: center;
+    animation: fadeDown 0.8s 0.3s ease both;
+    opacity: 0;
+    animation-fill-mode: forwards;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 36px 32px;
+    max-width: 560px;
+    width: 100%;
+    animation: slideUp 0.5s ease both;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    opacity: 0.7;
+  }
+
+  .card .emoji {
+    font-size: 32px;
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .card .question {
+    font-family: 'Lora', serif;
+    font-size: clamp(18px, 3vw, 22px);
+    line-height: 1.5;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .card .subtext {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 28px;
+    font-weight: 300;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .opt-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .opt-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .opt-btn.yes::before { background: linear-gradient(135deg, #5cb88a15, #5cb88a05); }
+  .opt-btn.no::before  { background: linear-gradient(135deg, #e06b7d15, #e06b7d05); }
+  .opt-btn.neu::before { background: linear-gradient(135deg, #7c6af715, #7c6af705); }
+
+  .opt-btn:hover {
+    transform: translateX(4px);
+    border-color: var(--accent);
+  }
+  .opt-btn:hover::before { opacity: 1; }
+  .opt-btn.yes:hover { border-color: var(--yes); }
+  .opt-btn.no:hover  { border-color: var(--no); }
+  .opt-btn.neu:hover { border-color: var(--neutral); }
+
+  .opt-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .opt-text { flex: 1; }
+  .opt-text strong { display: block; font-weight: 500; }
+  .opt-text span { font-size: 12px; color: var(--muted); }
+
+  /* Result card */
+  .result-card {
+    text-align: center;
+    padding: 48px 32px;
+  }
+
+  .result-card .result-emoji {
+    font-size: 56px;
+    margin-bottom: 20px;
+    display: block;
+    animation: pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  .result-card h2 {
+    font-family: 'Lora', serif;
+    font-size: 24px;
+    margin-bottom: 12px;
+  }
+
+  .result-card p {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.7;
+    max-width: 380px;
+    margin: 0 auto 28px;
+  }
+
+  .insight-box {
+    background: #13121a;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: left;
+    margin-bottom: 24px;
+  }
+
+  .insight-box .label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .insight-box p {
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .restart-btn {
+    background: linear-gradient(135deg, var(--accent2), #9b6af7);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 14px 32px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.2s, opacity 0.2s;
+  }
+
+  .restart-btn:hover { transform: translateY(-2px); opacity: 0.9; }
+
+  .breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 28px;
+    max-width: 560px;
+    width: 100%;
+    animation: fadeDown 0.4s ease both;
+  }
+
+  .crumb {
+    font-size: 11px;
+    background: #1a1820;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 4px 12px;
+    color: var(--muted);
+  }
+
+  .back-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    padding: 8px 16px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 560px;
+    width: fit-content;
+  }
+
+  .back-btn:hover { color: var(--text); border-color: var(--accent); }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pop {
+    from { transform: scale(0.5); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="tag">DeepThought × Daily Reflection</span>
+  <h1>How was your day,<br><em>really?</em></h1>
+  <p>A few honest questions. No judgment. Just clarity.</p>
+</header>
+
+<div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+<div class="step-label" id="stepLabel">Step 1 of 5</div>
+
+<div id="breadcrumb" class="breadcrumb" style="display:none;"></div>
+<button class="back-btn" id="backBtn" onclick="goBack()" style="display:none;">← Go back</button>
+
+<div class="card" id="card"></div>
+
+<script>
+// ─── TREE STRUCTURE ──────────────────────────────────────────────────────────
+// Each node: { id, emoji, question, subtext, options: [{icon, label, desc, type, next}] }
+// Leaf nodes: { id, emoji, title, message, insight, result: true }
+
+const tree = {
+  // ── ROOT ──
+  start: {
+    id: 'start',
+    emoji: '🌙',
+    question: 'How are you feeling as the day ends?',
+    subtext: 'Be honest with yourself. No right or wrong answer here.',
+    options: [
+      { icon: '😌', label: 'Pretty good, actually', desc: 'I feel okay or better', type: 'yes', next: 'good_day' },
+      { icon: '😐', label: 'Mixed — it had its moments', desc: 'Some parts good, some not', type: 'neu', next: 'mixed_day' },
+      { icon: '😔', label: 'Honestly, not great', desc: 'Today was tough', type: 'no', next: 'hard_day' },
+    ]
+  },
+
+  // ── BRANCH: GOOD DAY ──
+  good_day: {
+    id: 'good_day',
+    emoji: '✨',
+    question: 'Great! Did you make progress on something that matters to you?',
+    subtext: 'Even small wins count — finishing a task, learning something, having a good conversation.',
+    options: [
+      { icon: '✅', label: 'Yes, I moved forward', desc: 'I made real progress', type: 'yes', next: 'good_progress' },
+      { icon: '🌀', label: 'Not really, but I feel okay', desc: 'Restful or social day', type: 'neu', next: 'good_rest' },
+    ]
+  },
+
+  good_progress: {
+    id: 'good_progress',
+    emoji: '🎯',
+    question: 'Did you do something that pushed you slightly outside your comfort zone?',
+    subtext: 'Growth often hides in small uncomfortable moments.',
+    options: [
+      { icon: '💪', label: 'Yes, I pushed myself', type: 'yes', next: 'r_thriving' },
+      { icon: '😊', label: 'Not today — and that\'s fine', type: 'neu', next: 'r_steady_progress' },
+    ]
+  },
+
+  good_rest: {
+    id: 'good_rest',
+    emoji: '🌿',
+    question: 'Did you take care of yourself today — rest, food, water, movement?',
+    subtext: 'Self-care is productive too.',
+    options: [
+      { icon: '🥤', label: 'Yes, I took care of myself', type: 'yes', next: 'r_recharged' },
+      { icon: '😅', label: 'Not really, I need to do better', type: 'no', next: 'r_gentle_reminder' },
+    ]
+  },
+
+  // ── BRANCH: MIXED DAY ──
+  mixed_day: {
+    id: 'mixed_day',
+    emoji: '⚖️',
+    question: 'What felt heavier today — your tasks or your emotions?',
+    subtext: 'Sometimes the day is hard because of work. Sometimes it\'s just how we feel inside.',
+    options: [
+      { icon: '📋', label: 'Tasks/work felt overwhelming', type: 'no', next: 'mixed_tasks' },
+      { icon: '💭', label: 'My thoughts and emotions were heavy', type: 'neu', next: 'mixed_emotions' },
+      { icon: '🤷', label: 'Both, honestly', type: 'no', next: 'mixed_both' },
+    ]
+  },
+
+  mixed_tasks: {
+    id: 'mixed_tasks',
+    emoji: '📋',
+    question: 'Did you at least finish the most important thing on your list?',
+    subtext: 'One done task beats ten half-done ones.',
+    options: [
+      { icon: '✅', label: 'Yes, the key thing is done', type: 'yes', next: 'r_focus_win' },
+      { icon: '😓', label: 'No, I got stuck or distracted', type: 'no', next: 'mixed_stuck' },
+    ]
+  },
+
+  mixed_stuck: {
+    id: 'mixed_stuck',
+    emoji: '🪨',
+    question: 'Do you know why you got stuck?',
+    subtext: 'Awareness is the first step to fixing it.',
+    options: [
+      { icon: '🧠', label: 'Yes, I know what happened', type: 'yes', next: 'r_aware_blocker' },
+      { icon: '❓', label: 'Not sure, it just didn\'t happen', type: 'no', next: 'r_find_blocker' },
+    ]
+  },
+
+  mixed_emotions: {
+    id: 'mixed_emotions',
+    emoji: '💭',
+    question: 'Did you talk to someone about how you felt, or did you keep it to yourself?',
+    subtext: 'Neither is wrong. Just noticing.',
+    options: [
+      { icon: '💬', label: 'I talked to someone', type: 'yes', next: 'r_connected' },
+      { icon: '🔒', label: 'I kept it inside', type: 'no', next: 'r_internalized' },
+    ]
+  },
+
+  mixed_both: {
+    id: 'mixed_both',
+    emoji: '🌧️',
+    question: 'On days like this, what usually helps you reset?',
+    subtext: 'Think about what has worked for you before.',
+    options: [
+      { icon: '🎵', label: 'Music, rest, or creative outlet', type: 'neu', next: 'r_reset_creative' },
+      { icon: '🏃', label: 'Movement, walk, or exercise', type: 'yes', next: 'r_reset_active' },
+      { icon: '😴', label: 'Sleep — tomorrow is a new day', type: 'neu', next: 'r_reset_sleep' },
+    ]
+  },
+
+  // ── BRANCH: HARD DAY ──
+  hard_day: {
+    id: 'hard_day',
+    emoji: '🌧️',
+    question: 'I\'m sorry it was hard. What made it difficult?',
+    subtext: 'Naming it helps. You don\'t have to solve it, just see it.',
+    options: [
+      { icon: '😤', label: 'Something frustrating happened', type: 'no', next: 'hard_frustration' },
+      { icon: '😟', label: 'I felt anxious or low all day', type: 'no', next: 'hard_anxiety' },
+      { icon: '😶', label: 'I just couldn\'t get myself to do anything', type: 'neu', next: 'hard_unmotivated' },
+    ]
+  },
+
+  hard_frustration: {
+    id: 'hard_frustration',
+    emoji: '😤',
+    question: 'Was the frustrating thing in your control — or outside it?',
+    subtext: 'This matters. We often drain energy fighting things we can\'t change.',
+    options: [
+      { icon: '🔧', label: 'Mostly in my control', type: 'yes', next: 'r_ownership' },
+      { icon: '🌊', label: 'Outside my control', type: 'no', next: 'r_let_go' },
+    ]
+  },
+
+  hard_anxiety: {
+    id: 'hard_anxiety',
+    emoji: '😟',
+    question: 'Did the anxiety/low feeling have a clear reason, or did it just show up?',
+    subtext: 'Sometimes we know why. Sometimes it just comes.',
+    options: [
+      { icon: '🔍', label: 'I know what triggered it', type: 'yes', next: 'r_named_anxiety' },
+      { icon: '🌫️', label: 'It just showed up, no clear reason', type: 'no', next: 'r_floating_anxiety' },
+    ]
+  },
+
+  hard_unmotivated: {
+    id: 'hard_unmotivated',
+    emoji: '😶',
+    question: 'Did you eat well and sleep okay last night?',
+    subtext: 'Motivation is often just a physical state in disguise.',
+    options: [
+      { icon: '✅', label: 'Yes, basics were fine', type: 'yes', next: 'r_deeper_unmotivated' },
+      { icon: '❌', label: 'Not really, basics were off', type: 'no', next: 'r_basics_first' },
+    ]
+  },
+
+  // ─── RESULTS ──────────────────────────────────────────────────────────────
+  r_thriving: {
+    result: true,
+    emoji: '🌟',
+    title: 'You\'re in a growth phase',
+    message: 'Progress + discomfort = growth. You did both today. That\'s rare. Don\'t take it for granted.',
+    insight: '💡 Tomorrow: Write down one thing you learned today before you sleep. Growth compounds when it\'s noticed.'
+  },
+
+  r_steady_progress: {
+    result: true,
+    emoji: '🏡',
+    title: 'Solid, grounded day',
+    message: 'Not every day needs to be a breakthrough. You made progress, felt okay, and that\'s genuinely good.',
+    insight: '💡 Tomorrow: Pick one thing that would make tomorrow feel like a "good day" too. Just one.'
+  },
+
+  r_recharged: {
+    result: true,
+    emoji: '🔋',
+    title: 'You took care of yourself',
+    message: 'Rest is not laziness. Recovery is part of the process. You needed this day and you listened to yourself.',
+    insight: '💡 Tomorrow: You\'re recharged. What\'s one small step you can take on something you\'ve been postponing?'
+  },
+
+  r_gentle_reminder: {
+    result: true,
+    emoji: '🌱',
+    title: 'Your body is waiting for you',
+    message: 'It\'s easy to skip the basics — water, sleep, food, movement. But they\'re what keep everything else working.',
+    insight: '💡 Tonight: Drink a glass of water right now. Sleep before midnight. Small, but real.'
+  },
+
+  r_focus_win: {
+    result: true,
+    emoji: '🎯',
+    title: 'The important thing got done',
+    message: 'Even when the day felt scattered, you finished what mattered. That\'s real discipline.',
+    insight: '💡 Tomorrow: Start with your #1 priority before anything else. Protect your first hour.'
+  },
+
+  r_aware_blocker: {
+    result: true,
+    emoji: '🧩',
+    title: 'Awareness is already progress',
+    message: 'You know what blocked you. Most people don\'t. That awareness means tomorrow can be different.',
+    insight: '💡 Tonight: Write down the blocker and one tiny thing you could do differently tomorrow.'
+  },
+
+  r_find_blocker: {
+    result: true,
+    emoji: '🔦',
+    title: 'Time to get curious, not critical',
+    message: 'You got stuck but you\'re not sure why. That\'s okay. Don\'t beat yourself up — instead, get curious.',
+    insight: '💡 Try this: Think back to when you last felt productive. What was different? Environment? Time? Energy? Find the pattern.'
+  },
+
+  r_connected: {
+    result: true,
+    emoji: '🤝',
+    title: 'Connection is healing',
+    message: 'Sharing what you feel — even a little — is brave. You didn\'t carry it alone today.',
+    insight: '💡 Notice: Did talking help? Even if just a little? Sometimes naming feelings out loud is enough.'
+  },
+
+  r_internalized: {
+    result: true,
+    emoji: '📓',
+    title: 'It\'s okay, but don\'t make it a habit',
+    message: 'Sometimes we need quiet to process. But keeping everything inside too long makes it heavier.',
+    insight: '💡 Tonight: Write 3 lines in a journal or notes app. What happened. How it felt. What you wish was different.'
+  },
+
+  r_reset_creative: {
+    result: true,
+    emoji: '🎨',
+    title: 'Rest through what you love',
+    message: 'On heavy days, creative outlets aren\'t escaping — they\'re resetting. You know what you need.',
+    insight: '💡 Tonight: Do that thing. No guilt. It\'s part of recovery.'
+  },
+
+  r_reset_active: {
+    result: true,
+    emoji: '🏃',
+    title: 'Move it out',
+    message: 'Your body holds the stress your mind can\'t process. Movement is one of the fastest resets there is.',
+    insight: '💡 Even a 10-minute walk outside can shift your mood. Try it tonight if you haven\'t yet.'
+  },
+
+  r_reset_sleep: {
+    result: true,
+    emoji: '🌙',
+    title: 'Sleep is the real reset button',
+    message: 'Sometimes the bravest thing is to close the day, let it go, and trust tomorrow will be different.',
+    insight: '💡 Tonight: Put your phone down 20 mins before sleep. Let your mind arrive at rest before your body does.'
+  },
+
+  r_ownership: {
+    result: true,
+    emoji: '🔧',
+    title: 'You can fix this — and you know it',
+    message: 'The frustrating thing was in your hands. That means the solution is too. You\'re not stuck, you\'re just between attempts.',
+    insight: '💡 Tomorrow: Write one concrete action you can take to address what frustrated you. Specific. Small. Doable.'
+  },
+
+  r_let_go: {
+    result: true,
+    emoji: '🍃',
+    title: 'This one\'s not yours to carry',
+    message: 'Spending energy on things outside your control drains you without changing anything. This is genuinely hard to accept.',
+    insight: '💡 Ask yourself: "Is there anything I can actually do about this?" If no — give yourself permission to let it go for tonight.'
+  },
+
+  r_named_anxiety: {
+    result: true,
+    emoji: '🔍',
+    title: 'You named it. That\'s power.',
+    message: 'When anxiety has a name, it\'s no longer just a fog. You can work with something you can see.',
+    insight: '💡 Tonight: Write down the trigger. Then write: "What\'s the worst realistic thing that could happen?" Most fears shrink when we look at them directly.'
+  },
+
+  r_floating_anxiety: {
+    result: true,
+    emoji: '🌫️',
+    title: 'Sometimes anxiety just shows up',
+    message: 'Not every bad feeling has a reason. That doesn\'t make it less real. But it also means it will pass on its own.',
+    insight: '💡 Try this: 4-7-8 breathing. Inhale 4 sec, hold 7, exhale 8. Do it 3 times. It actually works.'
+  },
+
+  r_deeper_unmotivated: {
+    result: true,
+    emoji: '🌑',
+    title: 'This might be burnout or disconnection',
+    message: 'When basics are fine but you still can\'t move — that\'s a signal. You might need something that excites you again, or just genuine rest.',
+    insight: '💡 Ask: When did I last feel genuinely interested in something? What was it? See if you can do a tiny bit of that this week.'
+  },
+
+  r_basics_first: {
+    result: true,
+    emoji: '🛏️',
+    title: 'Your foundation needs fixing first',
+    message: 'Motivation, focus, mood — they all run on sleep, food, and water. You can\'t build a great day on a broken foundation.',
+    insight: '💡 Tonight: Sleep is your #1 job. Nothing else matters more than getting 7–8 hours tonight. Everything else can wait.'
+  },
+};
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let history = [];
+let currentId = 'start';
+const totalSteps = 5;
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+function render(id) {
+  const node = tree[id];
+  const card = document.getElementById('card');
+  const prog = document.getElementById('progress');
+  const stepLabel = document.getElementById('stepLabel');
+  const breadcrumb = document.getElementById('breadcrumb');
+  const backBtn = document.getElementById('backBtn');
+
+  card.style.animation = 'none';
+  setTimeout(() => { card.style.animation = ''; }, 10);
+
+  // Progress
+  const pct = Math.min((history.length / totalSteps) * 100, 100);
+  prog.style.width = pct + '%';
+  stepLabel.textContent = `Step ${history.length + 1} of ${totalSteps}`;
+
+  // Breadcrumb
+  if (history.length > 0) {
+    breadcrumb.style.display = 'flex';
+    breadcrumb.innerHTML = history.map(h => {
+      const n = tree[h];
+      return `<span class="crumb">${n.emoji} ${n.question.substring(0, 30)}…</span>`;
+    }).join('');
+  } else {
+    breadcrumb.style.display = 'none';
+  }
+
+  backBtn.style.display = history.length > 0 ? 'flex' : 'none';
+
+  if (node.result) {
+    card.innerHTML = `
+      <div class="result-card">
+        <span class="result-emoji">${node.emoji}</span>
+        <h2>${node.title}</h2>
+        <p>${node.message}</p>
+        <div class="insight-box">
+          <span class="label">Tonight's Reflection</span>
+          <p>${node.insight}</p>
+        </div>
+        <button class="restart-btn" onclick="restart()">🔄 Reflect again</button>
+      </div>
+    `;
+    prog.style.width = '100%';
+    stepLabel.textContent = 'Reflection complete ✓';
+  } else {
+    card.innerHTML = `
+      <span class="emoji">${node.emoji}</span>
+      <div class="question">${node.question}</div>
+      <div class="subtext">${node.subtext}</div>
+      <div class="options">
+        ${node.options.map(o => `
+          <button class="opt-btn ${o.type}" onclick="choose('${o.next}', '${id}')">
+            <span class="opt-icon">${o.icon}</span>
+            <span class="opt-text">
+              <strong>${o.label}</strong>
+              ${o.desc ? `<span>${o.desc}</span>` : ''}
+            </span>
+          </button>
+        `).join('')}
+      </div>
+    `;
+  }
+}
+
+function choose(nextId, currentId) {
+  history.push(currentId);
+  render(nextId);
+}
+
+function goBack() {
+  if (history.length === 0) return;
+  const prev = history.pop();
+  render(prev);
+}
+
+function restart() {
+  history = [];
+  render('start');
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+render('start');
+</script>
+</body>
+</html>
