@@ -1,0 +1,368 @@
+{
+  "meta": {
+    "title": "Daily Reflection Tree",
+    "version": "1.0",
+    "author": "Vaishnavi Dhage",
+    "assignment": "DeepThought CultureTech - AI Product Management",
+    "description": "A deterministic decision tree to guide employees through daily self-reflection across three psychological axes: Agency, Contribution, and Concern."
+  },
+  "axes": {
+    "axis_1": "Agency — Did I have control over my day?",
+    "axis_2": "Contribution — Did I add value?",
+    "axis_3": "Concern — Did I care for myself and others?"
+  },
+  "tree": {
+    "id": "start",
+    "emoji": "🌙",
+    "question": "How are you feeling as the day ends?",
+    "subtext": "Be honest with yourself. No right or wrong answer here.",
+    "axis": 1,
+    "options": [
+      {
+        "label": "Pretty good, actually",
+        "desc": "I feel okay or better",
+        "next": {
+          "id": "good_day",
+          "emoji": "✨",
+          "question": "Did you make progress on something that matters to you?",
+          "subtext": "Even small wins count — finishing a task, learning something, having a good conversation.",
+          "axis": 1,
+          "options": [
+            {
+              "label": "Yes, I moved forward",
+              "next": {
+                "id": "good_progress",
+                "emoji": "🎯",
+                "question": "Did you do something that pushed you slightly outside your comfort zone?",
+                "subtext": "Growth often hides in small uncomfortable moments.",
+                "axis": 1,
+                "options": [
+                  {
+                    "label": "Yes, I pushed myself",
+                    "next": {
+                      "id": "r_thriving",
+                      "result": true,
+                      "emoji": "🌟",
+                      "title": "You're in a growth phase",
+                      "message": "Progress + discomfort = growth. You did both today.",
+                      "insight": "Tomorrow: Write down one thing you learned today before you sleep."
+                    }
+                  },
+                  {
+                    "label": "Not today — and that's fine",
+                    "next": {
+                      "id": "r_steady_progress",
+                      "result": true,
+                      "emoji": "🏡",
+                      "title": "Solid, grounded day",
+                      "message": "Not every day needs to be a breakthrough. You made progress and that's genuinely good.",
+                      "insight": "Tomorrow: Pick one thing that would make tomorrow feel like a good day too."
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "label": "Not really, but I feel okay",
+              "next": {
+                "id": "good_rest",
+                "emoji": "🌿",
+                "question": "Did you take care of yourself today — rest, food, water, movement?",
+                "subtext": "Self-care is productive too.",
+                "axis": 3,
+                "options": [
+                  {
+                    "label": "Yes, I took care of myself",
+                    "next": {
+                      "id": "r_recharged",
+                      "result": true,
+                      "emoji": "🔋",
+                      "title": "You took care of yourself",
+                      "message": "Rest is not laziness. Recovery is part of the process.",
+                      "insight": "Tomorrow: You're recharged. What's one small step on something you've been postponing?"
+                    }
+                  },
+                  {
+                    "label": "Not really, I need to do better",
+                    "next": {
+                      "id": "r_gentle_reminder",
+                      "result": true,
+                      "emoji": "🌱",
+                      "title": "Your body is waiting for you",
+                      "message": "The basics — water, sleep, food, movement — keep everything else working.",
+                      "insight": "Tonight: Drink a glass of water right now. Sleep before midnight."
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "label": "Mixed — it had its moments",
+        "desc": "Some parts good, some not",
+        "next": {
+          "id": "mixed_day",
+          "emoji": "⚖️",
+          "question": "What felt heavier today — your tasks or your emotions?",
+          "subtext": "Sometimes the day is hard because of work. Sometimes it's just how we feel inside.",
+          "axis": 1,
+          "options": [
+            {
+              "label": "Tasks/work felt overwhelming",
+              "next": {
+                "id": "mixed_tasks",
+                "emoji": "📋",
+                "question": "Did you at least finish the most important thing on your list?",
+                "subtext": "One done task beats ten half-done ones.",
+                "axis": 2,
+                "options": [
+                  {
+                    "label": "Yes, the key thing is done",
+                    "next": {
+                      "id": "r_focus_win",
+                      "result": true,
+                      "emoji": "🎯",
+                      "title": "The important thing got done",
+                      "message": "Even when the day felt scattered, you finished what mattered. That's real discipline.",
+                      "insight": "Tomorrow: Start with your #1 priority before anything else."
+                    }
+                  },
+                  {
+                    "label": "No, I got stuck or distracted",
+                    "next": {
+                      "id": "mixed_stuck",
+                      "emoji": "🪨",
+                      "question": "Do you know why you got stuck?",
+                      "subtext": "Awareness is the first step to fixing it.",
+                      "axis": 1,
+                      "options": [
+                        {
+                          "label": "Yes, I know what happened",
+                          "next": {
+                            "id": "r_aware_blocker",
+                            "result": true,
+                            "emoji": "🧩",
+                            "title": "Awareness is already progress",
+                            "message": "You know what blocked you. That awareness means tomorrow can be different.",
+                            "insight": "Tonight: Write down the blocker and one tiny thing you could do differently tomorrow."
+                          }
+                        },
+                        {
+                          "label": "Not sure, it just didn't happen",
+                          "next": {
+                            "id": "r_find_blocker",
+                            "result": true,
+                            "emoji": "🔦",
+                            "title": "Time to get curious, not critical",
+                            "message": "You got stuck but you're not sure why. Don't beat yourself up — get curious instead.",
+                            "insight": "Try this: Think back to when you last felt productive. What was different?"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "label": "My thoughts and emotions were heavy",
+              "next": {
+                "id": "mixed_emotions",
+                "emoji": "💭",
+                "question": "Did you talk to someone about how you felt, or did you keep it to yourself?",
+                "subtext": "Neither is wrong. Just noticing.",
+                "axis": 3,
+                "options": [
+                  {
+                    "label": "I talked to someone",
+                    "next": {
+                      "id": "r_connected",
+                      "result": true,
+                      "emoji": "🤝",
+                      "title": "Connection is healing",
+                      "message": "Sharing what you feel — even a little — is brave. You didn't carry it alone today.",
+                      "insight": "Notice: Did talking help? Even if just a little?"
+                    }
+                  },
+                  {
+                    "label": "I kept it inside",
+                    "next": {
+                      "id": "r_internalized",
+                      "result": true,
+                      "emoji": "📓",
+                      "title": "It's okay, but don't make it a habit",
+                      "message": "Sometimes we need quiet to process. But keeping everything inside too long makes it heavier.",
+                      "insight": "Tonight: Write 3 lines in a journal. What happened. How it felt. What you wish was different."
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "label": "Both, honestly",
+              "next": {
+                "id": "mixed_both",
+                "emoji": "🌧️",
+                "question": "On days like this, what usually helps you reset?",
+                "subtext": "Think about what has worked for you before.",
+                "axis": 3,
+                "options": [
+                  {
+                    "label": "Music, rest, or creative outlet",
+                    "next": {
+                      "id": "r_reset_creative",
+                      "result": true,
+                      "emoji": "🎨",
+                      "title": "Rest through what you love",
+                      "message": "On heavy days, creative outlets aren't escaping — they're resetting.",
+                      "insight": "Tonight: Do that thing. No guilt. It's part of recovery."
+                    }
+                  },
+                  {
+                    "label": "Movement, walk, or exercise",
+                    "next": {
+                      "id": "r_reset_active",
+                      "result": true,
+                      "emoji": "🏃",
+                      "title": "Move it out",
+                      "message": "Your body holds the stress your mind can't process. Movement is one of the fastest resets.",
+                      "insight": "Even a 10-minute walk outside can shift your mood. Try it tonight."
+                    }
+                  },
+                  {
+                    "label": "Sleep — tomorrow is a new day",
+                    "next": {
+                      "id": "r_reset_sleep",
+                      "result": true,
+                      "emoji": "🌙",
+                      "title": "Sleep is the real reset button",
+                      "message": "Sometimes the bravest thing is to close the day, let it go, and trust tomorrow will be different.",
+                      "insight": "Tonight: Put your phone down 20 mins before sleep."
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "label": "Honestly, not great",
+        "desc": "Today was tough",
+        "next": {
+          "id": "hard_day",
+          "emoji": "🌧️",
+          "question": "I'm sorry it was hard. What made it difficult?",
+          "subtext": "Naming it helps. You don't have to solve it, just see it.",
+          "axis": 1,
+          "options": [
+            {
+              "label": "Something frustrating happened",
+              "next": {
+                "id": "hard_frustration",
+                "emoji": "😤",
+                "question": "Was the frustrating thing in your control — or outside it?",
+                "subtext": "This matters. We often drain energy fighting things we can't change.",
+                "axis": 1,
+                "options": [
+                  {
+                    "label": "Mostly in my control",
+                    "next": {
+                      "id": "r_ownership",
+                      "result": true,
+                      "emoji": "🔧",
+                      "title": "You can fix this — and you know it",
+                      "message": "The frustrating thing was in your hands. That means the solution is too.",
+                      "insight": "Tomorrow: Write one concrete action you can take. Specific. Small. Doable."
+                    }
+                  },
+                  {
+                    "label": "Outside my control",
+                    "next": {
+                      "id": "r_let_go",
+                      "result": true,
+                      "emoji": "🍃",
+                      "title": "This one's not yours to carry",
+                      "message": "Spending energy on things outside your control drains you without changing anything.",
+                      "insight": "Ask yourself: Is there anything I can actually do about this? If no — let it go for tonight."
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "label": "I felt anxious or low all day",
+              "next": {
+                "id": "hard_anxiety",
+                "emoji": "😟",
+                "question": "Did the anxiety have a clear reason, or did it just show up?",
+                "subtext": "Sometimes we know why. Sometimes it just comes.",
+                "axis": 1,
+                "options": [
+                  {
+                    "label": "I know what triggered it",
+                    "next": {
+                      "id": "r_named_anxiety",
+                      "result": true,
+                      "emoji": "🔍",
+                      "title": "You named it. That's power.",
+                      "message": "When anxiety has a name, it's no longer just a fog. You can work with something you can see.",
+                      "insight": "Tonight: Write the trigger. Then write: What's the worst realistic thing that could happen?"
+                    }
+                  },
+                  {
+                    "label": "It just showed up, no clear reason",
+                    "next": {
+                      "id": "r_floating_anxiety",
+                      "result": true,
+                      "emoji": "🌫️",
+                      "title": "Sometimes anxiety just shows up",
+                      "message": "Not every bad feeling has a reason. That doesn't make it less real. It will pass.",
+                      "insight": "Try 4-7-8 breathing: Inhale 4 sec, hold 7, exhale 8. Do it 3 times."
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "label": "I just couldn't get myself to do anything",
+              "next": {
+                "id": "hard_unmotivated",
+                "emoji": "😶",
+                "question": "Did you eat well and sleep okay last night?",
+                "subtext": "Motivation is often just a physical state in disguise.",
+                "axis": 3,
+                "options": [
+                  {
+                    "label": "Yes, basics were fine",
+                    "next": {
+                      "id": "r_deeper_unmotivated",
+                      "result": true,
+                      "emoji": "🌑",
+                      "title": "This might be burnout or disconnection",
+                      "message": "When basics are fine but you still can't move — that's a signal worth listening to.",
+                      "insight": "Ask: When did I last feel genuinely interested in something? Try a tiny bit of that this week."
+                    }
+                  },
+                  {
+                    "label": "Not really, basics were off",
+                    "next": {
+                      "id": "r_basics_first",
+                      "result": true,
+                      "emoji": "🛏️",
+                      "title": "Your foundation needs fixing first",
+                      "message": "Motivation, focus, mood — they all run on sleep, food, and water.",
+                      "insight": "Tonight: Sleep is your #1 job. Get 7-8 hours. Everything else can wait."
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
